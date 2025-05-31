@@ -43,7 +43,7 @@ export default function GenerateReport() {
         token: preferences.jiraToken,
       };
 
-      const jiraAPI = new JiraAPI(config);
+      let jiraAPI = new JiraAPI(config);
       const daysBack = parseInt(values.days) || 7;
 
       await showToast({
@@ -51,8 +51,40 @@ export default function GenerateReport() {
         title: "Jira 이슈를 조회하는 중...",
       });
 
-      const issues = await jiraAPI.getWeeklyIssues(daysBack);
-      const user = await jiraAPI.getCurrentUser();
+      // 다중 인증 전략 시도
+      let issues, user;
+      let authMethod = "Bearer";
+      
+      try {
+        // Bearer 토큰 먼저 시도
+        user = await jiraAPI.getCurrentUser();
+        issues = await jiraAPI.getWeeklyIssues(daysBack);
+      } catch (bearerError) {
+        try {
+          // Basic Auth로 재시도
+          const basicConfig = { ...config, authType: 'basic' as const };
+          jiraAPI = new JiraAPI(basicConfig);
+          user = await jiraAPI.getCurrentUser();
+          issues = await jiraAPI.getWeeklyIssues(daysBack);
+          authMethod = "Basic";
+        } catch (basicError) {
+          // REST API 2 시도 (구버전 Jira Server)
+          try {
+            const v2Config = { ...config, apiVersion: 'v2' as const };
+            jiraAPI = new JiraAPI(v2Config);
+            user = await jiraAPI.getCurrentUser();
+            issues = await jiraAPI.getWeeklyIssues(daysBack);
+            authMethod = "Bearer (API v2)";
+          } catch (v2Error) {
+            // 모든 인증 방식 실패 시 더 상세한 오류 정보 제공
+            const bearerMsg = bearerError instanceof Error ? bearerError.message : String(bearerError);
+            const basicMsg = basicError instanceof Error ? basicError.message : String(basicError);
+            const v2Msg = v2Error instanceof Error ? v2Error.message : String(v2Error);
+            
+            throw new Error(`All authentication methods failed:\n\nBearer Token (v3): ${bearerMsg}\n\nBasic Auth (v3): ${basicMsg}\n\nBearer Token (v2): ${v2Msg}`);
+          }
+        }
+      }
       
       if (issues.length === 0) {
         await showToast({
