@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-weekly-report",
+  "title": "Jira Weekly Report",
+  "description": "Generate weekly work reports from Jira issues",
+  "icon": "📊",
+  "author": "kiung",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-report",
+      "title": "Generate Weekly Report",
+      "subtitle": "Jira",
+      "description": "Generate a weekly work report from your Jira issues",
+      "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "Jira Settings",
+      "subtitle": "Configure",
+      "description": "Configure Jira connection settings and test connectivity",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira URL",
+      "description": "Your Jira instance URL (e.g., https://company.atlassian.net)",
+      "placeholder": "https://company.atlassian.net"
+    },
+    {
+      "name": "jiraEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Your Jira account email",
+      "placeholder": "your@email.com"
+    },
+    {
+      "name": "jiraToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token (PAT)",
+      "description": "Your Jira Personal Access Token (from Jira Settings > Personal Access Tokens)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.1",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.9",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
